@@ -11,6 +11,7 @@ local Section = Window:NewSection("Script")
 local locations = {
     {Name = "Spawn", Position = Vector3.new(196, 54, -102)},
     {Name = "Fried Potato", Position = Vector3.new(-47, 1023, 93)},
+    {Name = "knockout", Position = Vector3.new(196, 91, -93)},
 }
 
 local selectedLocationIndex = 1
@@ -41,5 +42,29 @@ Section:CreateButton("Teleport to Location", function()
         print("Teleportado para:", loc.Name)
     else
         warn("Não foi possível teleportar: personagem ou local não encontrado.")
+    end
+end)
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local remotes = ReplicatedStorage:WaitForChild("Remotes")
+local tempBind = remotes:WaitForChild("TemporaryReachedBindable")
+
+local autoMinigamesEnabled = false
+
+Section:CreateToggle("Auto Minigames", function(state)
+    autoMinigamesEnabled = state
+
+    if state then
+        task.spawn(function()
+            while autoMinigamesEnabled do
+                local args = {
+                    {
+                        GameQTE = true
+                    }
+                }
+                tempBind:FireServer(unpack(args))
+                task.wait(0.1) -- evita travar o jogo, ajusta o tempo conforme necessário
+            end
+        end)
     end
 end)
