@@ -68,3 +68,20 @@ Section:CreateToggle("Auto Minigames", function(state)
         end)
     end
 end)
+
+local autoSkipEnabled = false
+
+Section:CreateToggle("Auto Skip", function(state)
+    autoSkipEnabled = state
+    if state then
+        task.spawn(function()
+            while autoSkipEnabled do
+                local args = { "Skipped" }
+                local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
+                local dialogueRemote = remotes:WaitForChild("DialogueRemote")
+                dialogueRemote:FireServer(unpack(args))
+                task.wait(0.2) -- espera um pouco para não travar o jogo
+            end
+        end)
+    end
+end)
