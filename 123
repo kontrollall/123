@@ -12,6 +12,7 @@ local locations = {
     {Name = "Spawn", Position = Vector3.new(196, 54, -102)},
     {Name = "Fried Potato", Position = Vector3.new(-47, 1023, 93)},
     {Name = "knockout", Position = Vector3.new(196, 91, -93)},
+    {Name = "Rope", Position = Vector3.new(726, 197, 9223)},
 }
 
 local selectedLocationIndex = 1
