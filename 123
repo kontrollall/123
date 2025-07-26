@@ -1,23 +1,31 @@
+-- Serviços
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local player = Players.LocalPlayer
+
+-- Função para garantir que sempre temos o HumanoidRootPart
+local function getRoot()
+	local character = player.Character or player.CharacterAdded:Wait()
+	return character:WaitForChild("HumanoidRootPart")
+end
+
+-- GUI Wizard
 local Library = assert(loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard")))()
 local Window = Library:NewWindow("Credits: TGMANKASKE")
 local Section = Window:NewSection("Script")
 
--- Lista de locais com nome e posição
+-- Locais para teleport
 local locations = {
     {Name = "Spawn", Position = Vector3.new(196, 54, -102)},
     {Name = "Fried Potato", Position = Vector3.new(-47, 1023, 93)},
-    {Name = "knockout", Position = Vector3.new(196, 91, -93)},
+    {Name = "Knockout", Position = Vector3.new(196, 91, -93)},
     {Name = "Rope", Position = Vector3.new(726, 197, 9223)},
 }
 
 local selectedLocationIndex = 1
 
--- Cria o dropdown para selecionar o local
+-- Dropdown de teleport
 Section:CreateDropdown("Select Location", (function()
     local names = {}
     for _, loc in ipairs(locations) do
@@ -25,7 +33,6 @@ Section:CreateDropdown("Select Location", (function()
     end
     return names
 end)(), 1, function(selected)
-    -- Encontra o índice do local selecionado
     for i, loc in ipairs(locations) do
         if loc.Name == selected then
             selectedLocationIndex = i
@@ -37,24 +44,22 @@ end)
 
 -- Botão para teleportar
 Section:CreateButton("Teleport to Location", function()
+    local rootPart = getRoot()
     local loc = locations[selectedLocationIndex]
     if loc and rootPart then
-        rootPart.CFrame = CFrame.new(loc.Position + Vector3.new(0, 5, 0)) -- sobe um pouco para evitar prender no chão
+        rootPart.CFrame = CFrame.new(loc.Position + Vector3.new(0, 5, 0))
         print("Teleportado para:", loc.Name)
     else
-        warn("Não foi possível teleportar: personagem ou local não encontrado.")
+        warn("Não foi possível teleportar.")
     end
 end)
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local remotes = ReplicatedStorage:WaitForChild("Remotes")
-local tempBind = remotes:WaitForChild("TemporaryReachedBindable")
-
+-- Toggle: Auto Minigames
+local tempBind = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TemporaryReachedBindable")
 local autoMinigamesEnabled = false
 
 Section:CreateToggle("Auto Minigames", function(state)
     autoMinigamesEnabled = state
-
     if state then
         task.spawn(function()
             while autoMinigamesEnabled do
@@ -64,7 +69,24 @@ Section:CreateToggle("Auto Minigames", function(state)
                     }
                 }
                 tempBind:FireServer(unpack(args))
-                task.wait(0.1) -- evita travar o jogo, ajusta o tempo conforme necessário
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- Toggle: Auto Skip
+local dialogueRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DialogueRemote")
+local autoSkipEnabled = false
+
+Section:CreateToggle("Auto Skip", function(state)
+    autoSkipEnabled = state
+    if state then
+        task.spawn(function()
+            while autoSkipEnabled do
+                local args = { "Skipped" }
+                dialogueRemote:FireServer(unpack(args))
+                task.wait(0.2)
             end
         end)
     end
