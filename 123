@@ -1,38 +1,45 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard"))()
-local Window = Library:NewWindow("Credits: TGMANKASKE")
-local Section = Window:NewSection("Teleportes")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- Tabela de mapas com nomes e posições
-local teleportLocations = {
-    ["Fried Potato"] = Vector3.new(-43, 1023, 85),
-    ["Golden Hills"] = Vector3.new(120, 900, 45),
-    ["Dark Cavern"] = Vector3.new(-500, 1050, 200)
+local Library = assert(loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard")))()
+local Window = Library:NewWindow("Credits: TGMANKASKE")
+local Section = Window:NewSection("Script")
+
+-- Lista de locais com nome e posição
+local locations = {
+    {Name = "Spawn", Position = Vector3.new(196, 54, -102)},
+    {Name = "Fried Potato", Position = Vector3.new(-47, 1023, 93)},
 }
 
--- Função de teleporte
-local function teleportTo(position)
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(position)
-    end
-end
+local selectedLocationIndex = 1
 
--- Dropdown para seleção de mapa
-Section:CreateDropdown("Escolha o mapa", {}, function(selected)
-    local position = teleportLocations[selected]
-    if position then
-        teleportTo(position)
+-- Cria o dropdown para selecionar o local
+Section:CreateDropdown("Select Location", (function()
+    local names = {}
+    for _, loc in ipairs(locations) do
+        table.insert(names, loc.Name)
+    end
+    return names
+end)(), 1, function(selected)
+    -- Encontra o índice do local selecionado
+    for i, loc in ipairs(locations) do
+        if loc.Name == selected then
+            selectedLocationIndex = i
+            print("Local selecionado:", loc.Name)
+            break
+        end
     end
 end)
 
--- Atualizar o dropdown com os nomes dos mapas
-local dropdownNames = {}
-for name, _ in pairs(teleportLocations) do
-    table.insert(dropdownNames, name)
-end
-Section:UpdateDropdown("Escolha o mapa", dropdownNames)
-
--- Botão opcional para teleportar direto para todas as áreas (como era o antigo botão)
-Section:CreateButton("Teleportar: Fried Potato", function()
-    teleportTo(teleportLocations["Fried Potato"])
+-- Botão para teleportar
+Section:CreateButton("Teleport to Location", function()
+    local loc = locations[selectedLocationIndex]
+    if loc and rootPart then
+        rootPart.CFrame = CFrame.new(loc.Position + Vector3.new(0, 5, 0)) -- sobe um pouco para evitar prender no chão
+        print("Teleportado para:", loc.Name)
+    else
+        warn("Não foi possível teleportar: personagem ou local não encontrado.")
+    end
 end)
