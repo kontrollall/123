@@ -1,39 +1,38 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard"))()
 local Window = Library:NewWindow("Credits: TGMANKASKE")
-local Section = Window:NewSection("Teleports")
+local Section = Window:NewSection("Teleportes")
 
--- Tabela com nomes e posições dos mapas
-local mapPositions = {
+-- Tabela de mapas com nomes e posições
+local teleportLocations = {
     ["Fried Potato"] = Vector3.new(-43, 1023, 85),
-    ["Cheesy Hill"] = Vector3.new(100, 950, 75),
-    ["Spicy Mountain"] = Vector3.new(-150, 900, 60)
-    -- Adicione mais aqui: ["Nome do mapa"] = Vector3.new(x, y, z)
+    ["Golden Hills"] = Vector3.new(120, 900, 45),
+    ["Dark Cavern"] = Vector3.new(-500, 1050, 200)
 }
 
--- Cria lista de nomes para o dropdown (evita nil)
-local mapNames = {}
-for name, _ in pairs(mapPositions) do
-    if typeof(name) == "string" and name ~= "" then
-        table.insert(mapNames, name)
+-- Função de teleporte
+local function teleportTo(position)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(position)
     end
 end
 
--- Proteção contra dropdown vazio
-if #mapNames == 0 then
-    table.insert(mapNames, "Nenhum Mapa")
-end
-
--- Cria dropdown e trata seleção com segurança
-Section:CreateDropdown("Selecione o Mapa", mapNames, function(selectedMap)
-    local position = mapPositions[selectedMap]
+-- Dropdown para seleção de mapa
+Section:CreateDropdown("Escolha o mapa", {}, function(selected)
+    local position = teleportLocations[selected]
     if position then
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.CFrame = CFrame.new(position)
-        else
-            warn("Não foi possível encontrar o jogador ou o HumanoidRootPart.")
-        end
-    else
-        warn("Mapa não encontrado ou sem posição válida: " .. tostring(selectedMap))
+        teleportTo(position)
     end
+end)
+
+-- Atualizar o dropdown com os nomes dos mapas
+local dropdownNames = {}
+for name, _ in pairs(teleportLocations) do
+    table.insert(dropdownNames, name)
+end
+Section:UpdateDropdown("Escolha o mapa", dropdownNames)
+
+-- Botão opcional para teleportar direto para todas as áreas (como era o antigo botão)
+Section:CreateButton("Teleportar: Fried Potato", function()
+    teleportTo(teleportLocations["Fried Potato"])
 end)
