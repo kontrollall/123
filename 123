@@ -2,34 +2,38 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/blood
 local Window = Library:NewWindow("Credits: TGMANKASKE")
 local Section = Window:NewSection("Teleports")
 
--- Lista de mapas e posições
+-- Tabela com nomes e posições dos mapas
 local mapPositions = {
     ["Fried Potato"] = Vector3.new(-43, 1023, 85),
     ["Cheesy Hill"] = Vector3.new(100, 950, 75),
     ["Spicy Mountain"] = Vector3.new(-150, 900, 60)
-    -- Adicione mais posições aqui no formato: ["Nome"] = Vector3.new(x, y, z),
+    -- Adicione mais aqui: ["Nome do mapa"] = Vector3.new(x, y, z)
 }
 
--- Pega os nomes dos mapas para o dropdown
+-- Cria lista de nomes para o dropdown (evita nil)
 local mapNames = {}
 for name, _ in pairs(mapPositions) do
-    table.insert(mapNames, name)
+    if typeof(name) == "string" and name ~= "" then
+        table.insert(mapNames, name)
+    end
 end
 
--- Cria o dropdown com os nomes dos mapas
+-- Proteção contra dropdown vazio
+if #mapNames == 0 then
+    table.insert(mapNames, "Nenhum Mapa")
+end
+
+-- Cria dropdown e trata seleção com segurança
 Section:CreateDropdown("Selecione o Mapa", mapNames, function(selectedMap)
     local position = mapPositions[selectedMap]
     if position then
         local player = game.Players.LocalPlayer
         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             player.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+        else
+            warn("Não foi possível encontrar o jogador ou o HumanoidRootPart.")
         end
-    end
-end)
-
--- Botão opcional para mostrar posições salvas (debug)
-Section:CreateButton("Mostrar posições salvas", function()
-    for name, pos in pairs(mapPositions) do
-        print(name .. " = " .. tostring(pos))
+    else
+        warn("Mapa não encontrado ou sem posição válida: " .. tostring(selectedMap))
     end
 end)
